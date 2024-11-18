@@ -64,11 +64,11 @@ case $choice in
         mv phpMyAdmin-*-english/* /var/www/phpmyadmin
 
         # Set permissions
-        chown -R www-data:www-data /var/www/phpmyadmin
-        mkdir /var/www/phpmyadmin/config
-        chmod o+rw /var/www/phpmyadmin/config
-        cp /var/www/phpmyadmin/config.sample.inc.php /var/www/phpmyadmin/config/config.inc.php
-        chmod o+w /var/www/phpmyadmin/config/config.inc.php
+        chown -R www-data:www-data * 
+        mkdir config
+        chmod o+rw config
+        cp config.sample.inc.php config/config.inc.php
+        chmod o+w config/config.inc.php
 
         # Configure nginx for phpMyAdmin
         cat > /etc/nginx/sites-available/phpmyadmin.conf << EOF
