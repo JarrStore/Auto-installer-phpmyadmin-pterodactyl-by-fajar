@@ -64,7 +64,7 @@ do
                 certbot certonly --nginx -d $domainphp
 
                 # Web Server Configuration
-                nano /etc/nginx/sites-available/phpmyadmin.conf <<EOF
+                cat > /etc/nginx/sites-available/phpmyadmin.conf <<EOL
 server {
     listen 80;
     server_name $domainphp;
@@ -106,7 +106,7 @@ server {
         deny all;
     }
 }
-EOF
+EOL
 
                 # Apply Configuration
                 sudo ln -s /etc/nginx/sites-available/phpmyadmin.conf /etc/nginx/sites-enabled/phpmyadmin.conf
