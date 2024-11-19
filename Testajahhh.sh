@@ -1,4 +1,4 @@
-p#!/bin/bash
+#!/bin/bash
 
 # Warna teks
 RED='\033[0;31m'
