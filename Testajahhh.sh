@@ -66,15 +66,12 @@ case $choice in
         wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-english.tar.gz
         tar xvzf phpMyAdmin-latest-english.tar.gz
         mv /var/www/phpmyadmin/phpMyAdmin-*-english/* /var/www/phpMyAdmin
-        echo -e "${GREEN}phpMyAdmin berhasil dipasang.${RESET}"
-
-        # Mengatur Izin dan Konfigurasi
         chown -R www-data:www-data *
         mkdir config
         chmod o+rw config
         cp config.sample.inc.php config/config.inc.php
         chmod o+w config/config.inc.php
-        echo -e "${GREEN}Izin dan konfigurasi diatur.${RESET}"
+        echo -e "${GREEN}phpMyAdmin berhasil dipasang.${RESET}"
 
         # Membuat Sertifikat SSL
         certbot certonly --nginx -d ${domainphp}
