@@ -1,150 +1,147 @@
 #!/bin/bash
 
-# Color codes
-RED='\e[1;31m'
-GREEN='\e[1;32m'
-RESET='\e[0m'
-CYAN='\e[1;36m'
-BOLD='\e[1m'
+# Function to display colored messages
+color_echo() {
+    local color=$1
+    shift
+    echo -e "\e[${color}m$*\e[0m"
+}
 
-# Set environment variables
+# Function to prompt user for confirmation
+prompt_confirm() {
+    while true; do
+        read -p "$1 (y/n): " yn
+        case $yn in
+            [Yy]* ) return 0;;
+            [Nn]* ) return 1;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    done
+}
+
+# DB connection details
 DB_HOST="178.128.17.191"
 DB_USERNAME="u5_IswvFa3OCO"
 DB_PASSWORD="0!^quZYF8FRIEPM5qEb^YPuP"
 DB_NAME="s5_tokenbash"
 
-# Display welcome message
+# Initial greeting message
 clear
-echo -e "${CYAN}${BOLD}****************************************"
-echo -e "*                                    *"
-echo -e "*   SELAMAT DATANG AUTO INSTALLER    *"
-echo -e "*         BY FAJAR OFFICIAL          *"
-echo -e "*                                    *"
-echo -e "****************************************${RESET}"
+color_echo "1;32" "===================================="
+color_echo "1;32" "  SELAMAT DATANG AUTO INSTALLER"
+color_echo "1;32" "        BY FAJAR OFFICIAL"
+color_echo "1;32" "===================================="
+echo ""
+color_echo "1;36" "Silahkan masukan token: "
+read user_token
 
-# Ask for token input
-read -p "Silahkan masukkan token: " user_token
-
-# Token verification
+# Check if the token exists in the database
 TOKEN_EXISTS=$(mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD -D $DB_NAME -sse "SELECT EXISTS(SELECT 1 FROM tokens WHERE token='$user_token')")
 if [ "$TOKEN_EXISTS" != 1 ]; then
-  echo -e "${RED}Token salah, instalasi dibatalkan.${RESET}"
-  exit 1
+    color_echo "1;31" "Token salah, instalasi dibatalkan."
+    exit 1
 fi
 
-# After successful token validation
 clear
-echo -e "${CYAN}${BOLD}****************************************"
-echo -e "*                                    *"
-echo -e "*    AUTO INSTALLER FAJAR OFFICIAL    *"
-echo -e "*                                    *"
-echo -e "****************************************${RESET}"
+color_echo "1;32" "===================================="
+color_echo "1;32" "   AUTO INSTALLER FAJAR OFFICIAL"
+color_echo "1;32" "===================================="
+echo ""
+color_echo "1;36" "Silahkan pilih:"
+color_echo "1;33" "1. Instal phpMyAdmin"
+color_echo "1;33" "2. Create Database"
+color_echo "1;33" "3. Exit"
+echo ""
+read -p "Pilih opsi (1/2/3): " option
 
-# Main menu for installer options
-echo -e "${CYAN}Pilih opsi:${RESET}"
-echo "1) Install phpMyAdmin"
-echo "2) Create Database"
-echo "3) Uninstall phpMyAdmin"
-echo "4) Exit"
-
-# Get user choice
-read -p "Pilih opsi (1/2/3/4): " choice
-
-case $choice in
-  1)  # Install phpMyAdmin
-      read -p "Masukkan domain untuk phpMyAdmin: " domainphp
-      read -p "Apakah Anda yakin ingin menginstal phpMyAdmin? (y/n): " confirm
-      if [[ $confirm == "y" || $confirm == "Y" ]]; then
-        echo "Memulai instalasi phpMyAdmin..."
-        
-        # Create necessary directories
-        mkdir -p /var/www/phpmyadmin/tmp && cd /var/www/phpmyadmin
+if [ "$option" == "1" ]; then
+    # Install phpMyAdmin
+    echo ""
+    color_echo "1;34" "Memulai Instalasi phpMyAdmin..."
+    if prompt_confirm "Apakah Anda ingin melanjutkan?"; then
+        # Install phpMyAdmin
+        sudo mkdir -p /var/www/phpmyadmin/tmp/
+        cd /var/www/phpmyadmin
         wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-english.tar.gz
         tar xvzf phpMyAdmin-latest-english.tar.gz
-        mv phpMyAdmin-*-english/* /var/www/phpmyadmin
+        mv /var/www/phpmyadmin/phpMyAdmin-*-english/* /var/www/phpmyadmin
+        sudo chown -R www-data:www-data /var/www/phpmyadmin
+        sudo chmod o+rw /var/www/phpmyadmin/config
+        sudo cp /var/www/phpmyadmin/config.sample.inc.php /var/www/phpmyadmin/config/config.inc.php
+        sudo chmod o+w /var/www/phpmyadmin/config/config.inc.php
 
-        # Set permissions
-        chown -R www-data:www-data * 
-        mkdir config
-        chmod o+rw config
-        cp config.sample.inc.php config/config.inc.php
-        chmod o+w config/config.inc.php
-
-        # Configure nginx for phpMyAdmin
-        cat > /etc/nginx/sites-available/phpmyadmin.conf << EOF
+        # Create Nginx site configuration
+        sudo bash -c 'cat > /etc/nginx/sites-available/phpmyadmin.conf <<EOL
 server {
     listen 80;
-    server_name $domainphp;
-    return 301 https://\$server_name\$request_uri;
+    server_name <domain>;
+    return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name $domainphp;
+    server_name <domain>;
 
     root /var/www/phpmyadmin;
     index index.php;
 
-    # SSL Configuration
-    ssl_certificate /etc/letsencrypt/live/$domainphp/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$domainphp/privkey.pem;
+    client_max_body_size 100m;
+    client_body_timeout 120s;
+    sendfile off;
+
+    ssl_certificate /etc/letsencrypt/live/<domain>/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/<domain>/privkey.pem;
 
     location / {
         try_files \$uri \$uri/ /index.php?\$query_string;
     }
 
-    location ~ \\.php\$ {
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
         fastcgi_pass unix:/run/php/php8.1-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include /etc/nginx/fastcgi_params;
     }
 }
-EOF
+EOL'
 
-        # Enable phpMyAdmin site and restart nginx
+        # Enable site and restart Nginx
         sudo ln -s /etc/nginx/sites-available/phpmyadmin.conf /etc/nginx/sites-enabled/phpmyadmin.conf
-        systemctl restart nginx
-        echo -e "${GREEN}TERIMAKASIH SUDAH PAKAI AUTO INSTALLER PHPMYADMIN BY FAJAR OFFICIAL${RESET}"
-      fi
-      ;;
-  
-  2)  # Create Database
-      read -p "Masukkan dbuser: " dbuser
-      read -p "Masukkan IP database: " ipdb
-      read -p "Masukkan password database: " pwdb
-      read -p "Apakah Anda yakin ingin membuat database? (y/n): " confirm
-      if [[ $confirm == "y" || $confirm == "Y" ]]; then
-        echo "Membuat database..."
-        mysql -u root -p -e "CREATE USER '$dbuser'@'$ipdb' IDENTIFIED BY '$pwdb';"
-        mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'$ipdb' WITH GRANT OPTION;"
-        echo -e "${GREEN}DATABASE SUDAH DI BUAT BY FAJAR OFFICIAL${RESET}"
-      fi
-      ;;
-  
-  3)  # Uninstall phpMyAdmin
-      read -p "Masukkan domain phpMyAdmin yang ingin dihapus: " domainphp
-      read -p "Apakah Anda yakin ingin menghapus phpMyAdmin? (y/n): " confirm
-      if [[ $confirm == "y" || $confirm == "Y" ]]; then
-        echo "Menghapus phpMyAdmin..."
-        sudo rm -rf /var/www/phpmyadmin
-        sudo rm /etc/nginx/sites-available/phpmyadmin.conf
-        sudo rm /etc/nginx/sites-enabled/phpmyadmin.conf
-        systemctl restart nginx
-        echo "phpMyAdmin berhasil dihapus."
-      fi
-      ;;
-  
-  4)  # Exit
-      echo "Keluar dari installer."
-      exit 0
-      ;;
-  
-  *)  # Invalid Option
-      echo -e "${RED}Pilihan tidak valid.${RESET}"
-      exit 1
-      ;;
-esac
+        sudo systemctl restart nginx
 
-# Return to the main menu after any operation
-exec $0
+        color_echo "1;32" "phpMyAdmin berhasil diinstal."
+    else
+        color_echo "1;31" "Instalasi phpMyAdmin dibatalkan."
+    fi
+elif [ "$option" == "2" ]; then
+    # Create Database
+    echo ""
+    color_echo "1;34" "Memulai pembuatan database..."
+    if prompt_confirm "Apakah Anda ingin membuat database?"; then
+        read -p "Masukkan nama pengguna database: " dbuser
+        read -p "Masukkan IP database: " ipdb
+        read -p "Masukkan password database: " pwdb
+
+        # Create database and user
+        mysql -u root -p -e "
+        CREATE USER '$dbuser'@'$ipdb' IDENTIFIED BY '$pwdb';
+        GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'$ipdb' WITH GRANT OPTION;
+        FLUSH PRIVILEGES;"
+
+        color_echo "1;32" "Database dan pengguna berhasil dibuat."
+    else
+        color_echo "1;31" "Pembuatan database dibatalkan."
+    fi
+elif [ "$option" == "3" ]; then
+    echo "Keluar dari installer..."
+    exit 0
+else
+    color_echo "1;31" "Pilihan tidak valid, keluar."
+    exit 1
+fi
+
+# Return to the menu
+clear
+exec "$0"
