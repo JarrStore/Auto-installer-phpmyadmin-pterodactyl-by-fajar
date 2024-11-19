@@ -66,10 +66,11 @@ case $choice in
         wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-english.tar.gz
         tar xvzf phpMyAdmin-latest-english.tar.gz
         mv /var/www/phpmyadmin/phpMyAdmin-*-english/* /var/www/phpMyAdmin
-        sudo chown -R www-data:www-data /var/www/phpmyadmin
-        sudo chmod o+rw /var/www/phpmyadmin/config
-        sudo cp /var/www/phpmyadmin/config.sample.inc.php /var/www/phpmyadmin/config/config.inc.php
-        sudo chmod o+w /var/www/phpmyadmin/config/config.inc.php
+        chown -R www-data:www-data *
+        mkdir config
+        chmod o+rw config
+        cp config.sample.inc.php config/config.inc.php
+        chmod o+w config/config.inc.php
         echo -e "${GREEN}phpMyAdmin berhasil dipasang.${RESET}"
 
         # Membuat Sertifikat SSL
