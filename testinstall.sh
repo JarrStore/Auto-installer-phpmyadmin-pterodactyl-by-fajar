@@ -59,10 +59,10 @@ MYSQL_SCRIPT
         read -p "Masukkan domain: " DOMAIN
 
         # Install phpMyAdmin
-        mkdir /var/www/phpmyadmin && mkdir /var/www/phpmyadmin/tmp/ && cd /var/www/phpMyAdmin
+        mkdir /var/www/phpmyadmin && mkdir /var/www/phpmyadmin/tmp/ && cd /var/www/phpmyadmin
         wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-english.tar.gz
         tar xvzf phpMyAdmin-latest-english.tar.gz
-        mv /var/www/phpmyadmin/phpMyAdmin-*-english/* /var/www/phpMyAdmin
+        mv /var/www/phpmyadmin/phpMyAdmin-*-english/* /var/www/phpmyadmin
         chown -R www-data:www-data * 
         mkdir config
         chmod o+rw config
