@@ -70,7 +70,7 @@ MYSQL_SCRIPT
         mkdir config
         chmod o+rw config
         cp config.sample.inc.php config/config.inc.php
-         chmod o+w config/config.inc.php
+        chmod o+w config/config.inc.php
         echo -e "${GREEN}Izin dan konfigurasi diatur.${RESET}"
         
         # Membuat Sertifikat SSL
