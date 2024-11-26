@@ -12,25 +12,12 @@ DB_USERNAME="u5_IswvFa3OCO"
 DB_PASSWORD="0!^quZYF8FRIEPM5qEb^YPuP"
 DB_NAME="s5_tokenbash"
 
-# Fungsi untuk menampilkan running text
-show_running_text() {
-    text="Selamat Datang SC Auto Installer by Fajar Official"
-    tput civis  # Sembunyikan kursor
-    while :; do
-        for ((i = 0; i < ${#text}; i++)); do
-            tput cup 0 $i
-            echo -ne "${GREEN}${text:$i:1}${NC}"
-            sleep 0.1
-        done
-    done
-}
-
 # Pesan selamat datang
 clear
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}  SELAMAT DATANG AUTO INSTALLER BY FAJAR OFFICIAL  ${NC}"
 echo -e "${GREEN}========================================${NC}"
-echo -e "Silahkan masukan token:"
+echo -e "Silahkan masukkan token:"
 read user_token
 
 # Validasi token
@@ -38,10 +25,25 @@ TOKEN_EXISTS=$(mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD -D $DB_NAME -sse
 if [ "$TOKEN_EXISTS" != 1 ]; then
     echo -e "${RED}Kode Salah Kocak Buy di wa.me/+6283157602477 no free update token 10k free update token 20k${NC}"
     exit 1
-fi
+else
+    # Running text untuk menyambut pengguna
+    echo -e "${GREEN}Selamat datang SC Auto Installer by Fajar Official${NC}"
+    sleep 1  # Delay sejenak sebelum memulai running text
 
-# Tampilkan running text
-show_running_text &
+    # Running Text yang berjalan (scrolling)
+    clear
+    TEXT="Selamat datang SC Auto Installer by Fajar Official"
+    while :; do
+        echo -n -e "${GREEN}$TEXT\r"
+        TEXT="${TEXT:1}${TEXT:0:1}"  # Scroll text
+        sleep 0.3
+    done &
+
+    # Berikan waktu untuk running text sebelum melanjutkan ke menu
+    sleep 3  # Menjalankan selama 3 detik
+    kill $!  # Menghentikan running text setelah 3 detik
+    clear
+fi
 
 # Menu utama
 while true; do
