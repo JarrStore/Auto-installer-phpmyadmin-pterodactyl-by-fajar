@@ -21,7 +21,7 @@ echo -e "Silahkan masukan token:"
 read user_token
 
 # Validasi token
-TOKEN_EXISTS=$(mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD -D $DB_NAME -sse "SELECT EXISTS(SELECT 1 FROM tokens WHERE token='$user_token')")
+TOKEN_EXISTS=$(mariadb -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD -D $DB_NAME -sse "SELECT EXISTS(SELECT 1 FROM tokens WHERE token='$user_token')")
 if [ "$TOKEN_EXISTS" != 1 ]; then
     echo -e "${RED}Token salah, instalasi dibatalkan.${NC}"
     exit 1
