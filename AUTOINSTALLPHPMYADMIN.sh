@@ -7,10 +7,10 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Koneksi database
-DB_HOST="178.128.17.191"
-DB_USERNAME="u5_IswvFa3OCO"
-DB_PASSWORD="0!^quZYF8FRIEPM5qEb^YPuP"
-DB_NAME="s5_tokenbash"
+DB_HOST="178.128.108.87"
+DB_USERNAME="u4_S7x5nKzxKG"
+DB_PASSWORD="U2WYw@Vir22aC9zO.8prD3hj"
+DB_NAME="s4_tokenbash"
 
 # Pesan selamat datang
 clear
